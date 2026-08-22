@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seamless Dashboard Rotation</title>
+<title>Dashboard Monitor</title>
 
 <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
@@ -24,45 +24,25 @@
     @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
     #clock { color: #fff; font-family: monospace; font-size: 14px; }
 
-    /* Fullscreen Wide Dashboard Image Layer */
+    /* Single Fullscreen Wide Dashboard Image Layer */
     .dashboard-image-layer { 
         position: absolute; 
         top: 30px; 
         left: 0; 
         width: 100%; 
         height: calc(100% - 80px); 
-        background-size: 100% 100%; /* Stretches/fills the entire screen completely wide */
+        background-size: 100% 100%; 
         background-repeat: no-repeat; 
         background-position: center; 
         background-color: #000;
-        opacity: 0; 
-        transition: opacity 0.5s ease-in-out; 
-        z-index: 1; 
+        z-index: 2; 
     }
-    .dashboard-image-layer.active { opacity: 1; z-index: 2; }
 
     /* UI Overlay */
     .ui-container { position:absolute; top:40px; right:10px; z-index:9999; display: flex; align-items: center; gap: 10px; }
     .controls-bar { display: flex; gap: 5px; }
     button { padding: 5px 10px; cursor: pointer; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid #555; border-radius: 3px; font-size: 12px; }
     button:hover { background: #444; }
-
-    /* Fullscreen Slideshow Photo Layer */
-    #photo-display { 
-        display: none; 
-        opacity: 0; 
-        position: absolute; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        background-color: #000; 
-        background-size: cover; 
-        background-repeat: no-repeat; 
-        background-position: center; 
-        z-index: 10003; 
-        transition: opacity 1s ease-in-out; 
-    }
 
     /*================ WEATHER TICKER ================*/
     .weather-bar{
@@ -126,10 +106,8 @@
     </div>
 </div>
 
-<!-- Image Layers -->
-<div id="imgLayer1" class="dashboard-image-layer"></div>
-<div id="imgLayer2" class="dashboard-image-layer"></div>
-<div id="photo-display"></div>
+<!-- Single Dashboard Image Layer -->
+<div id="imgLayer" class="dashboard-image-layer"></div>
 
 <script>
 // Clock
@@ -137,32 +115,8 @@ function updateClock() { document.getElementById('clock').innerText = new Date()
 setInterval(updateClock, 1000);
 updateClock();
 
-// Dashboard Image Rotation List
-const DASHBOARD_IMAGES = ["dashboard1.png", "dashboard2.png"];
-const PHOTOS = ["sedc 2.png", "sedc1.png"];
-let photoIdx = 0;
-
-// Slideshow Photo Layer Logic
-function showPhoto() {
-    const pd = document.getElementById("photo-display");
-    pd.style.backgroundImage = `url('${PHOTOS[photoIdx % PHOTOS.length]}')`;
-    pd.style.display = "block";
-    setTimeout(() => { pd.style.opacity = "1"; }, 50);
-
-    setTimeout(() => {
-        pd.style.opacity = "0";
-        setTimeout(() => { pd.style.display = "none"; photoIdx++; }, 1000);
-    }, 20000);
-}
-setInterval(showPhoto, 640000); 
-
-// Dashboard Image Rotation Logic
 let currentZoom = 1;
-const imgLayer1 = document.getElementById("imgLayer1");
-const imgLayer2 = document.getElementById("imgLayer2");
-let activeLayer = imgLayer1;
-let hiddenLayer = imgLayer2;
-let currentIdx = 0;
+const imgLayer = document.getElementById("imgLayer");
 
 function changeZoom(currentDelta) { 
     currentZoom = Math.max(0.5, currentZoom + currentDelta); 
@@ -173,33 +127,20 @@ function resetZoom() {
     applyZoom(); 
 }
 function applyZoom() { 
-    [imgLayer1, imgLayer2].forEach(el => el.style.transform = `scale(${currentZoom})`); 
+    imgLayer.style.transform = `scale(${currentZoom})`; 
 }
 function toggleFullScreen() { 
     if (!document.fullscreenElement) document.documentElement.requestFullscreen(); 
     else document.exitFullscreen(); 
 }
 
-function rotateDashboards() {
-    currentIdx = (currentIdx + 1) % DASHBOARD_IMAGES.length;
-    hiddenLayer.style.backgroundImage = `url('${DASHBOARD_IMAGES[currentIdx]}?v=${Date.now()}')`;
-    
-    hiddenLayer.classList.add("active");
-    activeLayer.classList.remove("active");
-
-    const temp = activeLayer; 
-    activeLayer = hiddenLayer; 
-    hiddenLayer = temp;
-
-    setTimeout(rotateDashboards, 60000);
+// Load and auto-refresh dashboard1.png every 3 minutes (180,000 ms)
+function refreshDashboard() {
+    imgLayer.style.backgroundImage = `url('dashboard1.png?v=${Date.now()}')`;
 }
 
-function startDashboard() {
-    activeLayer.style.backgroundImage = `url('${DASHBOARD_IMAGES[0]}?v=${Date.now()}')`;
-    activeLayer.classList.add("active");
-    setTimeout(rotateDashboards, 60000);
-}
-startDashboard();
+refreshDashboard();
+setInterval(refreshDashboard, 180000);
 
 // Weather Ticker Logic
 async function loadWeather(){

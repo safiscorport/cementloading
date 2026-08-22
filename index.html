@@ -24,14 +24,14 @@
     @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
     #clock { color: #fff; font-family: monospace; font-size: 14px; }
 
-    /* Dashboard Image Slideshow Layer */
+    /* Fullscreen Wide Dashboard Image Layer */
     .dashboard-image-layer { 
         position: absolute; 
         top: 30px; 
         left: 0; 
         width: 100%; 
         height: calc(100% - 80px); 
-        background-size: contain; 
+        background-size: 100% 100%; /* Stretches/fills the entire screen completely wide */
         background-repeat: no-repeat; 
         background-position: center; 
         background-color: #000;
@@ -126,7 +126,7 @@
     </div>
 </div>
 
-<!-- Image Layers replacing the broken iframes -->
+<!-- Image Layers -->
 <div id="imgLayer1" class="dashboard-image-layer"></div>
 <div id="imgLayer2" class="dashboard-image-layer"></div>
 <div id="photo-display"></div>
@@ -137,7 +137,7 @@ function updateClock() { document.getElementById('clock').innerText = new Date()
 setInterval(updateClock, 1000);
 updateClock();
 
-// Dashboard Image Rotation List (Just replace these files locally to update data)
+// Dashboard Image Rotation List
 const DASHBOARD_IMAGES = ["dashboard1.png", "dashboard2.png"];
 const PHOTOS = ["sedc 2.png", "sedc1.png"];
 let photoIdx = 0;
@@ -182,7 +182,6 @@ function toggleFullScreen() {
 
 function rotateDashboards() {
     currentIdx = (currentIdx + 1) % DASHBOARD_IMAGES.length;
-    // Add cache-busting query parameter so browser reloads the image immediately when replaced
     hiddenLayer.style.backgroundImage = `url('${DASHBOARD_IMAGES[currentIdx]}?v=${Date.now()}')`;
     
     hiddenLayer.classList.add("active");
@@ -192,7 +191,7 @@ function rotateDashboards() {
     activeLayer = hiddenLayer; 
     hiddenLayer = temp;
 
-    setTimeout(rotateDashboards, 60000); // Rotates every 60 seconds
+    setTimeout(rotateDashboards, 60000);
 }
 
 function startDashboard() {
